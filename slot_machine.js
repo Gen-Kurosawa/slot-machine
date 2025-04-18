@@ -6,13 +6,13 @@
 // 定义符号类型及其相关属性
 const symbols = [
   { id: "WILD", name: "百搭", value: 0, probability: 0.05, payout: { 3: 15, 4: 50, 5: 100 } },
-  { id: "SEVEN", name: "七", value: 1, probability: 0.08, payout: { 3: 30, 4: 100, 5: 250 } },
-  { id: "BAR3", name: "三条", value: 2, probability: 0.10, payout: { 3: 20, 4: 60, 5: 180 } },
-  { id: "BAR2", name: "双条", value: 3, probability: 0.12, payout: { 3: 16, 4: 50, 5: 120 } },
-  { id: "BAR", name: "单条", value: 4, probability: 0.15, payout: { 3: 12, 4: 40, 5: 80 } },
-  { id: "CHERRY", name: "樱桃", value: 5, probability: 0.18, payout: { 3: 10, 4: 30, 5: 60 } },
-  { id: "ORANGE", name: "橙子", value: 6, probability: 0.20, payout: { 3: 8, 4: 20, 5: 40 } },
-  { id: "PLUM", name: "李子", value: 7, probability: 0.12, payout: { 3: 5, 4: 15, 5: 30 } }
+  { id: "SEVEN", name: "七", value: 1, probability: 0.08, payout: { 3: 20, 4: 80, 5: 200 } },
+  { id: "BAR3", name: "三条", value: 2, probability: 0.10, payout: { 3: 16, 4: 50, 5: 120 } },
+  { id: "BAR2", name: "双条", value: 3, probability: 0.12, payout: { 3: 12, 4: 40, 5: 80 } },
+  { id: "BAR", name: "单条", value: 4, probability: 0.15, payout: { 3: 10, 4: 30, 5: 60 } },
+  { id: "CHERRY", name: "樱桃", value: 5, probability: 0.18, payout: { 3: 8, 4: 20, 5: 40 } },
+  { id: "ORANGE", name: "橙子", value: 6, probability: 0.20, payout: { 3: 6, 4: 15, 5: 30 } },
+  { id: "PLUM", name: "李子", value: 7, probability: 0.12, payout: { 3: 4, 4: 10, 5: 20 } }
 ];
 
 // 游戏状态
@@ -283,7 +283,7 @@ function setTotalBet(amount) {
   }
   
   const index = TOTAL_BET_OPTIONS.indexOf(amount);
-  gameState.totalBet = TOTAL_BET_OPTIONS[index];
+  gameState.totalBet = BET_PER_LINE_OPTIONS[index] * activePaylines; // 修正计算方式
   gameState.betPerLine = BET_PER_LINE_OPTIONS[index];
   return true;
 }
@@ -293,11 +293,11 @@ function setTotalBet(amount) {
  * @returns {Object} 包含新的总下注和每线下注金额
  */
 function increaseTotalBet() {
-  const currentIndex = TOTAL_BET_OPTIONS.indexOf(gameState.totalBet);
+  const currentIndex = TOTAL_BET_OPTIONS.indexOf(gameState.totalBet / activePaylines * 20); // 适应不同线路数量
   if (currentIndex < TOTAL_BET_OPTIONS.length - 1) {
     const newIndex = currentIndex + 1;
-    gameState.totalBet = TOTAL_BET_OPTIONS[newIndex];
     gameState.betPerLine = BET_PER_LINE_OPTIONS[newIndex];
+    gameState.totalBet = gameState.betPerLine * activePaylines; // 计算实际总下注
   }
   return {
     totalBet: gameState.totalBet,
@@ -310,11 +310,11 @@ function increaseTotalBet() {
  * @returns {Object} 包含新的总下注和每线下注金额
  */
 function decreaseTotalBet() {
-  const currentIndex = TOTAL_BET_OPTIONS.indexOf(gameState.totalBet);
+  const currentIndex = TOTAL_BET_OPTIONS.indexOf(gameState.totalBet / activePaylines * 20); // 适应不同线路数量
   if (currentIndex > 0) {
     const newIndex = currentIndex - 1;
-    gameState.totalBet = TOTAL_BET_OPTIONS[newIndex];
     gameState.betPerLine = BET_PER_LINE_OPTIONS[newIndex];
+    gameState.totalBet = gameState.betPerLine * activePaylines; // 计算实际总下注
   }
   return {
     totalBet: gameState.totalBet,
@@ -380,6 +380,8 @@ function resetGame() {
 function setActivePaylines(count) {
   if (count >= 1 && count <= PAYLINES.length) {
     activePaylines = count;
+    // 更新总下注金额以反映支付线变化
+    gameState.totalBet = gameState.betPerLine * activePaylines;
   }
   return activePaylines;
 }
@@ -391,6 +393,8 @@ function setActivePaylines(count) {
 function increasePaylines() {
   if (activePaylines < PAYLINES.length) {
     activePaylines++;
+    // 更新总下注金额以反映支付线变化
+    gameState.totalBet = gameState.betPerLine * activePaylines;
   }
   return activePaylines;
 }
@@ -402,6 +406,8 @@ function increasePaylines() {
 function decreasePaylines() {
   if (activePaylines > 1) {
     activePaylines--;
+    // 更新总下注金额以反映支付线变化
+    gameState.totalBet = gameState.betPerLine * activePaylines;
   }
   return activePaylines;
 }
