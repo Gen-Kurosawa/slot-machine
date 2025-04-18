@@ -14,10 +14,103 @@
             overflow-x: hidden;
         }
         
+        /* 加载屏幕样式 */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-logo {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .loading-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            border-top: 8px solid #FFD700;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.5rem;
+            color: #FFD700;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .loading-progress-container {
+            width: 300px;
+            height: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #f1c40f, #e74c3c);
+            width: 0%;
+            transition: width 0.3s ease-in-out;
+        }
+        
+        .start-button {
+            padding: 15px 40px;
+            background: linear-gradient(to bottom, #e5b13a, #f1c40f);
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .start-button:hover {
+            background: linear-gradient(to bottom, #f1c40f, #f39c12);
+            transform: scale(1.05);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 剩余原有样式 */
         .container {
             max-width: 850px;
             margin: 0 auto;
             padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease;
         }
         
         header {
@@ -1296,6 +1389,20 @@
     </style>
 </head>
 <body>
+    <!-- 加载屏幕 -->
+    <div id="loading-overlay">
+        <div class="loading-logo">
+            <!-- 添加logo图片 -->
+            <img src="logo.png" alt="游戏标志">
+        </div>
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载游戏资源...</div>
+        <div class="loading-progress-container">
+            <div class="loading-progress-bar" id="progress-bar"></div>
+        </div>
+        <button class="start-button" id="start-game-btn">开始游戏</button>
+    </div>
+
     <!-- 背景音乐 -->
     <audio id="background-music" loop preload="auto">
         <source src="bgm.mp3" type="audio/mpeg">
@@ -1306,13 +1413,13 @@
     <div id="music-control" class="music-control">
         <span class="music-icon">🔇</span>
     </div>
-    
+
     <!-- 音量控制滑块 -->
     <div id="volume-control" class="volume-control">
         <span class="volume-icon">🔊</span>
         <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="50">
     </div>
-    
+
     <div class="container">
         <header>
             <h1>金钱旋风 - 老虎机</h1>
@@ -2961,6 +3068,102 @@
                 }, turboMode ? 300 : 1500);
             }
         }
+
+        // 图像加载逻辑
+        window.addEventListener('DOMContentLoaded', function() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const progressBar = document.getElementById('progress-bar');
+            const startGameBtn = document.getElementById('start-game-btn');
+            const container = document.querySelector('.container');
+            const bgMusic = document.getElementById('background-music');
+            
+            // 要加载的图片资源
+            const imagesToLoad = [
+                'logo.png'  // 添加logo到预加载列表
+            ].concat(Object.values(symbolImages));
+            
+            // 要加载的音频资源
+            const audioToLoad = ['bgm.mp3'];
+            
+            let loadedResources = 0;
+            const totalResources = imagesToLoad.length + audioToLoad.length;
+            
+            // 更新加载进度
+            function updateProgress() {
+                loadedResources++;
+                const progress = Math.min((loadedResources / totalResources) * 100, 100);
+                progressBar.style.width = progress + '%';
+                
+                // 所有资源加载完成
+                if (loadedResources >= totalResources) {
+                    setTimeout(() => {
+                        document.querySelector('.loading-text').textContent = '加载完成！点击按钮开始游戏';
+                        startGameBtn.style.display = 'block';
+                    }, 500);
+                }
+            }
+            
+            // 预加载图片
+            function preloadImages() {
+                if (imagesToLoad.length === 0) {
+                    return;
+                }
+                
+                imagesToLoad.forEach(src => {
+                    const img = new Image();
+                    img.onload = updateProgress;
+                    img.onerror = () => {
+                        console.error('无法加载图片:', src);
+                        updateProgress();
+                    };
+                    img.src = src;
+                });
+            }
+            
+            // 预加载音频
+            function preloadAudio() {
+                if (audioToLoad.length === 0) {
+                    return;
+                }
+                
+                audioToLoad.forEach(src => {
+                    const audio = new Audio();
+                    audio.oncanplaythrough = updateProgress;
+                    audio.onerror = () => {
+                        console.error('无法加载音频:', src);
+                        updateProgress();
+                    };
+                    audio.src = src;
+                });
+            }
+            
+            // 开始游戏
+            startGameBtn.addEventListener('click', function() {
+                loadingOverlay.style.opacity = '0';
+                
+                // 显示主界面
+                container.style.visibility = 'visible';
+                setTimeout(() => {
+                    container.style.opacity = '1';
+                }, 100);
+                
+                // 移除加载界面
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 500);
+            });
+            
+            // 开始加载资源
+            preloadImages();
+            preloadAudio();
+            
+            // 如果没有资源需要加载，直接显示开始按钮
+            if (totalResources === 0) {
+                progressBar.style.width = '100%';
+                document.querySelector('.loading-text').textContent = '加载完成！点击按钮开始游戏';
+                startGameBtn.style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html> 
