@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3x5老虎机游戏</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 10px 0;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #8B0000, #FF0000);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .slot-machine {
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .reels-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            background-color: #000;
+            padding: 15px;
+            border-radius: 5px;
+            border: 3px solid #4a4a4a;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .reel {
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            background-color: #111;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .symbol {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            background-color: #333;
+            border: 1px solid #555;
+            transition: background-color 0.3s;
+            position: relative;
+        }
+        
+        .symbol.highlighted {
+            animation: highlight 1s infinite;
+            box-shadow: 0 0 15px 5px gold;
+            z-index: 10;
+        }
+        
+        /* 添加获胜符号边框样式 */
+        .win-symbol-border {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 4px solid;
+            border-radius: 5px;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.6);
+            pointer-events: none;
+            z-index: 11;
+            animation: borderPulse 1.5s infinite;
+        }
+        
+        @keyframes borderPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.03); }
+        }
+        
+        @keyframes highlight {
+            0% { box-shadow: 0 0 15px 5px gold; }
+            50% { box-shadow: 0 0 25px 8px gold; }
+            100% { box-shadow: 0 0 15px 5px gold; }
+        }
+        
+        .symbol-name {
+            font-size: 1rem;
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ddd;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .bet-control, .total-bet-control, .credit-control, .bet-display-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .bet-display-container {
+            min-width: 100px;
+            justify-content: center;
+        }
+        
+        .bet-display, .total-bet-display {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            min-width: 80px;
+        }
+        
+        .highlight-box {
+            background-color: rgba(241, 196, 15, 0.2);
+            border: 1px solid rgba(241, 196, 15, 0.5);
+            border-radius: 4px;
+            padding: 3px 8px;
+            color: gold;
+            font-weight: bold;
+        }
+        
+        #bet-display {
+            color: #ccc;
+        }
+        
+        /* 金额显示样式 */
+        .amount {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        button {
+            background: linear-gradient(to bottom, #6c1b1b, #8b0000);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background: linear-gradient(to bottom, #8b0000, #a00);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        #spin-button {
+            background: linear-gradient(to bottom, #e5b13a, #f1c40f);
+            color: #000;
+            font-size: 1.5rem;
+            padding: 15px 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+        
+        #spin-button:hover {
+            background: linear-gradient(to bottom, #f1c40f, #f39c12);
+        }
+        
+        .win-display {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-top: 20px;
+            min-height: 60px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .big-win {
+            animation: bigWinAnimation 3s forwards;
+            font-size: 2rem;
+            color: gold;
+            text-shadow: 0 0 10px goldenrod;
+        }
+        
+        @keyframes bigWinAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+        
+        .info-panel {
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f1c40f;
+        }
+        
+        .paytable {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .paytable th, .paytable td {
+            border: 1px solid #444;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .paytable th {
+            background-color: #4a4a4a;
+        }
+        
+        .paytable tr:nth-child(even) {
+            background-color: #333;
+        }
+        
+        .paytable tr:hover {
+            background-color: #555;
+        }
+        
+        /* 控制转轴的旋转和停止 */
+        .reel .symbol.spining {
+            animation: spin 0.1s linear infinite;
+            overflow: hidden; /* 隐藏超出部分 */
+            position: relative;
+        }
+        
+        /* 添加旋转符号的容器样式 */
+        .spinning-symbols {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 500px; /* 足够高，包含多个符号 */
+            animation: scrollSymbols 0.3s linear infinite;
+        }
+        
+        .spinning-symbols .spin-symbol {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+        
+        @keyframes scrollSymbols {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-500px); }
+        }
+        
+        @keyframes spin {
+            from { transform: translateY(0); }
+            to { transform: translateY(-100px); }
+        }
+        
+        /* 转轴停止动画 */
+        #reel-0.stopping .symbol {
+            animation: bounceStop 0.5s ease-out forwards;
+        }
+        
+        #reel-1.stopping .symbol {
+            animation: bounceStop 0.5s ease-out 0.2s forwards;
+        }
+        
+        #reel-2.stopping .symbol {
+            animation: bounceStop 0.5s ease-out 0.4s forwards;
+        }
+        
+        #reel-3.stopping .symbol {
+            animation: bounceStop 0.5s ease-out 0.6s forwards;
+        }
+        
+        #reel-4.stopping .symbol {
+            animation: bounceStop 0.5s ease-out 0.8s forwards;
+        }
+        
+        @keyframes bounceStop {
+            0% { transform: translateY(0); }
+            20% { transform: translateY(-20px); }
+            40% { transform: translateY(15px); }
+            60% { transform: translateY(-10px); }
+            80% { transform: translateY(5px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .WILD { color: #ff9900; }
+        .SEVEN { color: #ff3300; }
+        .BAR3 { color: #ffcc00; }
+        .BAR2 { color: #66ff66; }
+        .BAR { color: #33ccff; }
+        .CHERRY { color: #ff0066; }
+        .ORANGE { color: #ff9966; }
+        .PLUM { color: #cc66ff; }
+        
+        /* 支付线样式 */
+        .payline-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .payline {
+            position: absolute;
+            background-color: transparent;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .payline-segment {
+            position: absolute;
+            height: 4px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.8);
+        }
+        
+        .payline-segment.active {
+            opacity: 0.75;
+            animation: paylineFlash 2s infinite;
+        }
+        
+        .payline-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 6;
+            box-shadow: 0 0 4px 2px rgba(255, 255, 255, 0.8);
+        }
+        
+        .payline-dot.active {
+            opacity: 1;
+            animation: dotFlash 2s infinite;
+        }
+        
+        @keyframes dotFlash {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+        
+        @keyframes paylineFlash {
+            0%, 100% { opacity: 0.75; }
+            50% { opacity: 0.4; }
+        }
+        
+        /* 每条支付线的不同颜色 */
+        .payline-0 { background-color: red; }
+        .payline-1 { background-color: blue; }
+        .payline-2 { background-color: green; }
+        .payline-3 { background-color: yellow; }
+        .payline-4 { background-color: purple; }
+        .payline-5 { background-color: orange; }
+        .payline-6 { background-color: pink; }
+        .payline-7 { background-color: cyan; }
+        .payline-8 { background-color: lime; }
+        .payline-9 { background-color: magenta; }
+        .payline-10 { background-color: gold; }
+        .payline-11 { background-color: silver; }
+        .payline-12 { background-color: brown; }
+        .payline-13 { background-color: teal; }
+        .payline-14 { background-color: indigo; }
+        .payline-15 { background-color: coral; }
+        .payline-16 { background-color: olive; }
+        .payline-17 { background-color: maroon; }
+        .payline-18 { background-color: turquoise; }
+        .payline-19 { background-color: violet; }
+        
+        /* 新增样式 */
+        .paylines-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .payline-info {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .payline-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            max-width: 500px;
+            margin: 10px auto;
+        }
+        
+        .payline-grid-item {
+            background-color: #444;
+            height: 20px;
+            border-radius: 3px;
+            position: relative;
+        }
+        
+        .payline-grid-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: yellow;
+        }
+        
+        .payline-toggle {
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .total-bet {
+            background-color: #3a3a3a;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #5a5a5a;
+        }
+        
+        /* 获胜线路信息条 */
+        .win-line-info {
+            padding: 5px 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .win-line-color-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        /* 自动旋转样式 */
+        .auto-spin-button {
+            background: linear-gradient(to bottom, #2c5999, #1a4a8f);
+            font-size: 0.9rem;
+            padding: 8px 15px;
+            width: 100%;
+            min-width: 120px;
+            margin: 0;
+        }
+        
+        .auto-spin-button.active {
+            background: linear-gradient(to bottom, #c73a3a, #9e2b2b);
+        }
+        
+        .auto-spin-button.infinite {
+            background: linear-gradient(to bottom, #1b6c1b, #008b00);
+        }
+        
+        .infinite-spin-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .infinite-spin-option:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .infinite-spin-checkbox {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            accent-color: #f1c40f;
+        }
+        
+        .infinity-icon {
+            font-size: 20px;
+            margin-right: 5px;
+            color: #f1c40f;
+        }
+        
+        /* 模态窗口样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal-content {
+            background-color: #2a2a2a;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-title {
+            margin-top: 0;
+            color: #f1c40f;
+            text-align: center;
+        }
+        
+        .auto-spin-select {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .auto-spin-value {
+            background-color: #333;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 5px 15px;
+            min-width: 60px;
+            text-align: center;
+            border-radius: 4px;
+            margin: 0 10px;
+        }
+        
+        .auto-spin-control {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        
+        .spins-remaining {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+        
+        /* 添加旋转按钮容器样式 */
+        .spin-buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+        
+        /* 音乐控制按钮样式 */
+        .music-control {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 100;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            border: 2px solid #f1c40f;
+            transition: all 0.3s ease;
+        }
+        
+        .music-control:hover {
+            transform: scale(1.1);
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .music-icon {
+            font-size: 22px;
+            color: #f1c40f;
+        }
+        
+        .music-control.muted .music-icon {
+            color: #999;
+        }
+        
+        /* 音量控制样式 */
+        .volume-control {
+            position: fixed;
+            top: 15px;
+            right: 65px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            padding: 5px 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            border: 2px solid #f1c40f;
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        .volume-control.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+        
+        .volume-slider {
+            width: 80px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 5px;
+            border-radius: 3px;
+            background: #555;
+            outline: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #f1c40f;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #f1c40f;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            border: none;
+        }
+        
+        .volume-icon {
+            font-size: 16px;
+            color: #f1c40f;
+            margin-right: 10px;
+        }
+        
+        /* 音乐提示样式 */
+        .play-prompt {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 5px;
+            z-index: 1000;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.5);
+            border: 1px solid #f1c40f;
+            font-weight: bold;
+        }
+        
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+        
+        /* Turbo模式按钮样式 */
+        .turbo-button {
+            background: linear-gradient(to bottom, #9c27b0, #7b1fa2);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin: 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .turbo-button:hover {
+            background: linear-gradient(to bottom, #7b1fa2, #6a1b9a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .turbo-button.active {
+            background: linear-gradient(to bottom, #ff9800, #f57c00);
+        }
+        
+        .turbo-icon {
+            width: 22px;
+            height: 22px;
+            display: inline-block;
+            vertical-align: middle;
+            filter: drop-shadow(0 0 3px rgba(255, 255, 0, 0.7));
+            transition: all 0.3s;
+        }
+        
+        .turbo-button.active .turbo-icon {
+            filter: drop-shadow(0 0 5px rgba(255, 255, 0, 0.9));
+            animation: pulse-lightning 1.5s infinite;
+        }
+        
+        @keyframes pulse-lightning {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255, 255, 0, 0.9)); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 8px rgba(255, 255, 0, 1)); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景音乐 -->
+    <audio id="background-music" loop preload="auto">
+        <source src="bgm.mp3" type="audio/mpeg">
+        <source src="bgm.ogg" type="audio/ogg">
+    </audio>
+    
+    <!-- 音乐控制按钮 -->
+    <div id="music-control" class="music-control">
+        <span class="music-icon">🔇</span>
+    </div>
+    
+    <!-- 音量控制滑块 -->
+    <div id="volume-control" class="volume-control">
+        <span class="volume-icon">🔊</span>
+        <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="50">
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>金钱旋风 - 老虎机</h1>
+        </header>
+        
+        <div class="slot-machine">
+            <div class="reels-container">
+                <div class="reel" id="reel-0">
+                    <div class="symbol"></div>
+                    <div class="symbol"></div>
+                    <div class="symbol"></div>
+                </div>
+                <div class="reel" id="reel-1">
+                    <div class="symbol"></div>
+                    <div class="symbol"></div>
+                    <div class="symbol"></div>
+                </div>
+                <div class="reel" id="reel-2">
+                    <div class="symbol"></div>
+                    <div class="symbol"></div>
+                    <div class="symbol"></div>
+                </div>
+                <div class="reel" id="reel-3">
+                    <div class="symbol"></div>
+                    <div class="symbol"></div>
+                    <div class="symbol"></div>
+                </div>
+                <div class="reel" id="reel-4">
+                    <div class="symbol"></div>
+                    <div class="symbol"></div>
+                    <div class="symbol"></div>
+                </div>
+                
+                <!-- 支付线容器 -->
+                <div class="payline-container" id="payline-container">
+                    <!-- 支付线将通过JavaScript动态添加 -->
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="bet-display-container">
+                    <span class="bet-display">
+                        <div>每线下注:</div>
+                        <div id="bet-display" class="amount">0.05</div>
+                    </span>
+                </div>
+                
+                <div class="paylines-control">
+                    <button id="paylines-down">-</button>
+                    <span>线路: <span id="paylines-display">20</span></span>
+                    <button id="paylines-up">+</button>
+                </div>
+                
+                <div class="total-bet-control">
+                    <button id="total-bet-down">-</button>
+                    <span class="total-bet-display">
+                        <div>总下注:</div>
+                        <div id="total-bet-display" class="amount highlight-box">1.00</div>
+                    </span>
+                    <button id="total-bet-up">+</button>
+                </div>
+                
+                <div class="spin-buttons-container">
+                    <button id="spin-button">旋转</button>
+                    <button id="auto-spin-button" class="auto-spin-button">自动旋转</button>
+                    <button id="turbo-button" class="turbo-button">
+                        <img src="Lightning-Emoji-PNG_001.png" class="turbo-icon" alt="⚡"> 极速模式
+                    </button>
+                </div>
+                
+                <div class="credit-control">
+                    <span>余额: <span id="credits-display" class="amount">1000.00</span></span>
+                    <button id="add-credits">充值</button>
+                </div>
+            </div>
+            
+            <!-- 自动旋转设置模态窗口 -->
+            <div id="auto-spin-modal" class="modal">
+                <div class="modal-content">
+                    <h3 class="modal-title">自动旋转设置</h3>
+                    <div class="auto-spin-select">
+                        <button id="auto-spin-minus" class="auto-spin-btn">-</button>
+                        <div id="auto-spin-value" class="auto-spin-value">50</div>
+                        <button id="auto-spin-plus" class="auto-spin-btn">+</button>
+                    </div>
+                    
+                    <div class="infinite-spin-option">
+                        <input type="checkbox" id="infinite-spin-checkbox" class="infinite-spin-checkbox">
+                        <label for="infinite-spin-checkbox"><span class="infinity-icon">∞</span> 无限旋转</label>
+                    </div>
+                    
+                    <div class="auto-spin-control">
+                        <button id="auto-spin-cancel">取消</button>
+                        <button id="auto-spin-start" style="background: linear-gradient(to bottom, #1b6c1b, #008b00);">开始</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="win-display" id="win-display">
+                <div>准备好了吗？点击旋转按钮开始游戏！</div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h2>游戏统计</h2>
+            <div class="stats">
+                <div class="stat-item">
+                    <div>总下注</div>
+                    <div class="stat-value amount" id="total-bet">0.00</div>
+                </div>
+                <div class="stat-item">
+                    <div>总赢取</div>
+                    <div class="stat-value amount" id="total-won">0.00</div>
+                </div>
+                <div class="stat-item">
+                    <div>旋转次数</div>
+                    <div class="stat-value" id="spins-count">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>回报率</div>
+                    <div class="stat-value" id="return-rate">0%</div>
+                </div>
+            </div>
+            
+            <h2>赔付表</h2>
+            <table class="paytable">
+                <thead>
+                    <tr>
+                        <th>符号</th>
+                        <th>3个相连</th>
+                        <th>4个相连</th>
+                        <th>5个相连</th>
+                    </tr>
+                </thead>
+                <tbody id="paytable-body">
+                    <!-- 将通过JavaScript填充 -->
+                </tbody>
+            </table>
+            
+            <!-- 在界面底部添加支付线信息和说明 -->
+            <div class="payline-info">
+                <h2>支付线示例</h2>
+                <p>本机共有20条支付线。下方显示部分支付线示例：</p>
+                <div class="payline-examples" id="payline-examples">
+                    <!-- 将通过JavaScript填充 -->
+                </div>
+                <div class="payline-toggle">
+                    <button id="show-paylines">显示所有支付线</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="slot_machine.js"></script>
+    <script>
+        // 符号的展示字符
+        const symbolChars = {
+            "WILD": "★",
+            "SEVEN": "7",
+            "BAR3": "≡",
+            "BAR2": "=",
+            "BAR": "-",
+            "CHERRY": "🍒",
+            "ORANGE": "🍊",
+            "PLUM": "🍇"
+        };
+        
+        // 修改符号名称显示
+        const symbolNames = {
+            "WILD": "百搭",
+            "SEVEN": "七",
+            "BAR3": "三条",
+            "BAR2": "双条",
+            "BAR": "单条",
+            "CHERRY": "樱桃",
+            "ORANGE": "橙子",
+            "PLUM": "李子"
+        };
+        
+        // DOM元素
+        const reels = Array.from(document.querySelectorAll('.reel'));
+        const spinButton = document.getElementById('spin-button');
+        const betDisplay = document.getElementById('bet-display');
+        const creditsDisplay = document.getElementById('credits-display');
+        const winDisplay = document.getElementById('win-display');
+        const addCreditsButton = document.getElementById('add-credits');
+        const totalBetDisplay = document.getElementById('total-bet-display');
+        const totalBetStatsDisplay = document.getElementById('total-bet');
+        const totalWonDisplay = document.getElementById('total-won');
+        const spinsCountDisplay = document.getElementById('spins-count');
+        const returnRateDisplay = document.getElementById('return-rate');
+        const paytableBody = document.getElementById('paytable-body');
+        const paylineContainer = document.getElementById('payline-container');
+        const paylinesDisplay = document.getElementById('paylines-display');
+        const paylinesUpButton = document.getElementById('paylines-up');
+        const paylinesDownButton = document.getElementById('paylines-down');
+        const totalBetUpButton = document.getElementById('total-bet-up');
+        const totalBetDownButton = document.getElementById('total-bet-down');
+        
+        // 自动旋转元素
+        const autoSpinButton = document.getElementById('auto-spin-button');
+        const autoSpinModal = document.getElementById('auto-spin-modal');
+        const autoSpinValue = document.getElementById('auto-spin-value');
+        const autoSpinMinus = document.getElementById('auto-spin-minus');
+        const autoSpinPlus = document.getElementById('auto-spin-plus');
+        const autoSpinCancel = document.getElementById('auto-spin-cancel');
+        const autoSpinStart = document.getElementById('auto-spin-start');
+        const infiniteSpinCheckbox = document.getElementById('infinite-spin-checkbox');
+        
+        // Turbo模式元素
+        const turboButton = document.getElementById('turbo-button');
+        let turboMode = false;
+        
+        // 自动旋转设置
+        let autoSpinCount = 50;
+        let autoSpinRemaining = 0;
+        let autoSpinInProgress = false;
+        let autoSpinInfinite = false;
+        let autoSpinTimer = null;
+        
+        // 填充赔付表
+        function populatePaytable() {
+            paytableBody.innerHTML = '';
+            
+            symbols.forEach(symbol => {
+                const row = document.createElement('tr');
+                
+                // 符号名称
+                const nameCell = document.createElement('td');
+                if (symbol.id === "WILD") {
+                    nameCell.innerHTML = `<span class="${symbol.id}">${symbolChars[symbol.id]}</span> ${symbolNames[symbol.id]}`;
+                    row.appendChild(nameCell);
+                    
+                    // 百搭特殊赔率
+                    const specialCell = document.createElement('td');
+                    specialCell.colSpan = 3;
+                    specialCell.style.textAlign = 'center';
+                    specialCell.style.color = '#f1c40f';
+                    specialCell.innerHTML = `<span style="font-weight: bold;">特殊赔率</span>`;
+                    row.appendChild(specialCell);
+                    
+                    paytableBody.appendChild(row);
+                    
+                    // 添加百搭的额外说明行
+                    const infoRow = document.createElement('tr');
+                    const infoCell = document.createElement('td');
+                    infoCell.colSpan = 4;
+                    infoCell.style.textAlign = 'left';
+                    infoCell.style.padding = '10px';
+                    infoCell.style.backgroundColor = 'rgba(255, 215, 0, 0.1)';
+                    infoCell.style.color = '#f1c40f';
+                    infoCell.innerHTML = `
+                        <div style="font-weight: bold; margin-bottom: 5px;">百搭特殊赔率：</div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">
+                            <span>3个 = 15x</span>
+                            <span>4个 = 50x</span>
+                            <span>5个 = 100x</span>
+                            <span>6个 = 350x</span>
+                            <span>7个 = 1000x</span>
+                            <span>8个 = 2500x</span>
+                            <span>9个以上 = 5000x</span>
+                        </div>
+                        <div style="margin-top: 5px; font-size: 0.9em;">百搭符号可以替代任意其他符号形成获胜组合</div>
+                    `;
+                    infoRow.appendChild(infoCell);
+                    paytableBody.appendChild(infoRow);
+                } else {
+                    nameCell.innerHTML = `<span class="${symbol.id}">${symbolChars[symbol.id]}</span> ${symbolNames[symbol.id]}`;
+                    row.appendChild(nameCell);
+                    
+                    // 3连、4连、5连赔付
+                    for (let i = 3; i <= 5; i++) {
+                        const payCell = document.createElement('td');
+                        payCell.textContent = symbol.payout[i] + 'x';
+                        row.appendChild(payCell);
+                    }
+                    
+                    paytableBody.appendChild(row);
+                }
+            });
+        }
+        
+        // 格式化金额为两位小数
+        function formatAmount(amount) {
+            return amount.toFixed(2);
+        }
+        
+        // 创建支付线容器
+        function createPaylines() {
+            // 清空容器
+            paylineContainer.innerHTML = '';
+            
+            // 为每条支付线创建一个元素
+            for (let i = 0; i < slotMachine.PAYLINES.length; i++) {
+                const payline = document.createElement('div');
+                payline.className = `payline payline-${i}`;
+                payline.id = `payline-${i}`;
+                paylineContainer.appendChild(payline);
+            }
+        }
+        
+        // 绘制支付线
+        function drawPayline(paylineIndex, show = true) {
+            // 获取或创建支付线元素
+            let paylineElement = document.getElementById(`payline-${paylineIndex}`);
+            
+            if (!paylineElement) {
+                paylineElement = document.createElement('div');
+                paylineElement.className = `payline payline-${paylineIndex}`;
+                paylineElement.id = `payline-${paylineIndex}`;
+                paylineContainer.appendChild(paylineElement);
+            }
+            
+            // 清空支付线内容
+            paylineElement.innerHTML = '';
+            
+            // 如果不显示，返回
+            if (!show) {
+                return;
+            }
+            
+            // 获取支付线的坐标
+            const coordinates = slotMachine.PAYLINES[paylineIndex];
+            const paylineColor = getComputedStyle(document.documentElement)
+                .getPropertyValue(`--payline-${paylineIndex}-color`) || 
+                document.querySelector(`.payline-${paylineIndex}`)?.style.backgroundColor ||
+                getPaylineColor(paylineIndex);
+            
+            // 获取转轴容器的位置
+            const containerRect = paylineContainer.getBoundingClientRect();
+            
+            // 获取所有点的位置
+            const points = [];
+            for (let i = 0; i < coordinates.length; i++) {
+                const [row, col] = coordinates[i];
+                const symbolElement = reels[col].children[row];
+                const rect = symbolElement.getBoundingClientRect();
+                
+                points.push({
+                    x: rect.left - containerRect.left + rect.width / 2,
+                    y: rect.top - containerRect.top + rect.height / 2,
+                    element: symbolElement
+                });
+                
+                // 添加点标记
+                const dot = document.createElement('div');
+                dot.className = 'payline-dot active';
+                dot.style.backgroundColor = paylineColor;
+                dot.style.left = `${points[i].x - 5}px`; // 5是dot宽度的一半
+                dot.style.top = `${points[i].y - 5}px`;  // 5是dot高度的一半
+                paylineElement.appendChild(dot);
+            }
+            
+            // 绘制每一段线
+            for (let i = 0; i < points.length - 1; i++) {
+                const startPoint = points[i];
+                const endPoint = points[i + 1];
+                
+                // 计算线段的长度和角度
+                const length = Math.sqrt(
+                    Math.pow(endPoint.x - startPoint.x, 2) + 
+                    Math.pow(endPoint.y - startPoint.y, 2)
+                );
+                const angle = Math.atan2(
+                    endPoint.y - startPoint.y, 
+                    endPoint.x - startPoint.x
+                ) * 180 / Math.PI;
+                
+                // 创建线段
+                const segment = document.createElement('div');
+                segment.className = 'payline-segment active';
+                segment.style.backgroundColor = paylineColor;
+                segment.style.width = `${length}px`;
+                segment.style.left = `${startPoint.x}px`;
+                segment.style.top = `${startPoint.y}px`;
+                segment.style.transform = `rotate(${angle}deg)`;
+                segment.style.transformOrigin = '0 0';
+                
+                paylineElement.appendChild(segment);
+            }
+        }
+        
+        // 获取支付线颜色
+        function getPaylineColor(index) {
+            const colors = [
+                'red', 'blue', 'green', 'yellow', 'purple', 
+                'orange', 'pink', 'cyan', 'lime', 'magenta',
+                'gold', 'silver', 'brown', 'teal', 'indigo',
+                'coral', 'olive', 'maroon', 'turquoise', 'violet'
+            ];
+            return colors[index % colors.length];
+        }
+        
+        // 绘制所有活跃的支付线
+        function drawActivePaylines() {
+            // 先隐藏所有支付线
+            for (let i = 0; i < slotMachine.PAYLINES.length; i++) {
+                const paylineElement = document.getElementById(`payline-${i}`);
+                if (paylineElement) {
+                    paylineElement.innerHTML = '';
+                }
+            }
+            
+            // 显示活跃的支付线
+            const state = slotMachine.getGameState();
+            for (let i = 0; i < state.activePaylines; i++) {
+                drawPayline(i, true);
+            }
+        }
+        
+        // 初始化老虎机显示
+        function initializeDisplay() {
+            // 更新状态显示
+            updateDisplay();
+            
+            // 填充赔付表
+            populatePaytable();
+            
+            // 创建支付线
+            createPaylines();
+            
+            // 初始化老虎机符号
+            spinReels(false); // 不显示动画
+        }
+        
+        // 旋转老虎机
+        function spinReels(animate = true) {
+            // 如果正在旋转，不做任何操作
+            if (spinButton.disabled) {
+                return;
+            }
+            
+            // 禁用旋转按钮
+            spinButton.disabled = true;
+            
+            // 清除所有支付线、高亮和边框
+            for (let i = 0; i < slotMachine.PAYLINES.length; i++) {
+                const paylineElement = document.getElementById(`payline-${i}`);
+                if (paylineElement) {
+                    paylineElement.innerHTML = '';
+                }
+            }
+            
+            // 清除所有符号的高亮和边框
+            document.querySelectorAll('.symbol').forEach(symbol => {
+                symbol.classList.remove('highlighted');
+                // 移除旧边框
+                const oldBorders = symbol.querySelectorAll('.win-symbol-border');
+                oldBorders.forEach(border => border.remove());
+            });
+            
+            if (animate) {
+                // 清除所有转轴的旋转和停止类
+                reels.forEach(reel => {
+                    reel.classList.remove('stopping');
+                    Array.from(reel.children).forEach(symbol => {
+                        symbol.classList.remove('spining');
+                        // 移除旧的旋转符号容器
+                        const oldSpinningSymbols = symbol.querySelector('.spinning-symbols');
+                        if (oldSpinningSymbols) {
+                            symbol.removeChild(oldSpinningSymbols);
+                        }
+                    });
+                });
+                
+                // 显示旋转信息
+                winDisplay.innerHTML = '<div>旋转中...</div>';
+                
+                // 执行实际的旋转逻辑，获取结果但不立即显示
+                const spinResult = slotMachine.spin();
+                
+                if (spinResult.error) {
+                    // 显示错误信息
+                    winDisplay.innerHTML = `<div style="color: red;">${spinResult.error}</div>`;
+                    spinButton.disabled = false;
+                    autoSpinCancel.click(); // 如果出错，停止自动旋转
+                    return;
+                }
+                
+                // 预创建一个随机符号数组用于旋转动画
+                const randomSymbolsForAnimation = [];
+                for (let i = 0; i < 20; i++) {
+                    const randomIndex = Math.floor(Math.random() * symbols.length);
+                    randomSymbolsForAnimation.push(symbols[randomIndex]);
+                }
+                
+                // 设置每个转轴开始旋转的时间（从左到右）
+                for (let i = 0; i < reels.length; i++) {
+                    const reel = reels[i];
+                    // Turbo模式下所有转轴几乎同时开始旋转
+                    const startDelay = turboMode ? i * 20 : i * 150; // 普通模式每个转轴间隔150ms，Turbo模式20ms
+                    
+                    setTimeout(() => {
+                        // 为每个符号位置添加旋转符号容器
+                        Array.from(reel.children).forEach(symbol => {
+                            // 添加旋转类
+                            symbol.classList.add('spining');
+                            
+                            // 创建旋转符号容器
+                            const spinningSymbolsContainer = document.createElement('div');
+                            spinningSymbolsContainer.className = 'spinning-symbols';
+                            
+                            // 添加20个随机符号
+                            for (let j = 0; j < 20; j++) {
+                                const randomSymbol = randomSymbolsForAnimation[j];
+                                const spinSymbol = document.createElement('div');
+                                spinSymbol.className = 'spin-symbol';
+                                spinSymbol.innerHTML = `
+                                    <span class="${randomSymbol.id}">${symbolChars[randomSymbol.id]}</span>
+                                `;
+                                spinningSymbolsContainer.appendChild(spinSymbol);
+                            }
+                            
+                            // 添加到符号元素中
+                            symbol.appendChild(spinningSymbolsContainer);
+                        });
+                    }, startDelay);
+                }
+                
+                // 设置一个总的旋转时间，之后开始每个转轴依次停止
+                // Turbo模式下，总旋转时间大大缩短
+                const totalSpinTime = turboMode ? 300 : 2000; // Turbo模式0.3秒，普通模式2秒
+                
+                // 设置每个转轴停止的时间（从左到右）
+                for (let i = 0; i < reels.length; i++) {
+                    const reel = reels[i];
+                    // Turbo模式下转轴几乎同时停止，普通模式下依次停止
+                    const stopDelay = totalSpinTime + (turboMode ? i * 50 : i * 600); 
+                    
+                    setTimeout(() => {
+                        // 添加停止类以触发弹跳动画
+                        reel.classList.add('stopping');
+                        
+                        // 稍后移除旋转类和旋转符号容器
+                        setTimeout(() => {
+                            Array.from(reel.children).forEach(symbol => {
+                                symbol.classList.remove('spining');
+                                
+                                // 移除旋转符号容器
+                                const spinningSymbols = symbol.querySelector('.spinning-symbols');
+                                if (spinningSymbols) {
+                                    symbol.removeChild(spinningSymbols);
+                                }
+                            });
+                        }, turboMode ? 100 : 400); // Turbo模式下更快移除
+                        
+                        // 更新该转轴的符号
+                        const symbolElements = Array.from(reel.children);
+                        for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
+                            const symbolElement = symbolElements[rowIndex];
+                            const symbol = spinResult.result[rowIndex][i];
+                            
+                            // 清除之前的高亮
+                            symbolElement.classList.remove('highlighted');
+                            
+                            // 更新符号内容
+                            symbolElement.innerHTML = `
+                                <span class="${symbol.id}">${symbolChars[symbol.id]}</span>
+                                <span class="symbol-name">${symbol.name}</span>
+                            `;
+                        }
+                        
+                        // 如果是最后一个转轴，在停止后显示获胜信息
+                        if (i === reels.length - 1) {
+                            setTimeout(() => {
+                                checkAndDisplayWins(spinResult);
+                                spinButton.disabled = false;
+                                
+                                // 处理自动旋转
+                                if (autoSpinInProgress) {
+                                    if (autoSpinInfinite || autoSpinRemaining > 0) {
+                                        // 如果是无限模式或还有剩余次数
+                                        if (!autoSpinInfinite) {
+                                            // 更新剩余次数显示
+                                            autoSpinRemaining--;
+                                            updateAutoSpinDisplay();
+                                        }
+                                        
+                                        // 如果还有剩余次数或是无限模式，继续自动旋转
+                                        if (autoSpinInfinite || autoSpinRemaining > 0) {
+                                            // 设置延迟以便玩家能看到结果
+                                            // Turbo模式下减少等待时间
+                                            autoSpinTimer = setTimeout(() => {
+                                                if (autoSpinInProgress) {
+                                                    spinReels(true);
+                                                }
+                                            }, turboMode ? 300 : 1500);
+                                        } else {
+                                            // 自动旋转完成
+                                            autoSpinCancel.click();
+                                        }
+                                    } else {
+                                        // 自动旋转完成
+                                        autoSpinCancel.click();
+                                    }
+                                }
+                            }, turboMode ? 100 : 600); // Turbo模式下更快显示结果
+                        }
+                    }, stopDelay);
+                }
+            } else {
+                // 初始化时不需要动画，直接更新显示
+                const dummyResult = [];
+                for (let i = 0; i < 3; i++) {
+                    const row = [];
+                    for (let j = 0; j < 5; j++) {
+                        const randomSymbolIndex = Math.floor(Math.random() * symbols.length);
+                        row.push(symbols[randomSymbolIndex]);
+                    }
+                    dummyResult.push(row);
+                }
+                updateReelsDisplay(dummyResult);
+                spinButton.disabled = false;
+            }
+        }
+        
+        // 更新转轴显示 - 这个函数只用于初始化了，旋转后的更新已移到spinReels中进行
+        function updateReelsDisplay(resultMatrix) {
+            for (let reelIndex = 0; reelIndex < 5; reelIndex++) {
+                const reelElement = reels[reelIndex];
+                const symbolElements = Array.from(reelElement.children);
+                
+                for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
+                    const symbolElement = symbolElements[rowIndex];
+                    const symbol = resultMatrix[rowIndex][reelIndex];
+                    
+                    // 清除之前的高亮
+                    symbolElement.classList.remove('highlighted');
+                    
+                    // 更新符号内容
+                    symbolElement.innerHTML = `
+                        <span class="${symbol.id}">${symbolChars[symbol.id]}</span>
+                        <span class="symbol-name">${symbol.name}</span>
+                    `;
+                }
+            }
+        }
+        
+        // 检查获胜并显示结果
+        function checkAndDisplayWins(spinResult) {
+            const { winLines, totalWin } = spinResult;
+            updateDisplay();
+            
+            // 先隐藏所有支付线和高亮/边框
+            for (let i = 0; i < slotMachine.PAYLINES.length; i++) {
+                const paylineElement = document.getElementById(`payline-${i}`);
+                if (paylineElement) {
+                    paylineElement.innerHTML = '';
+                }
+            }
+            
+            // 清除所有符号的高亮和边框
+            document.querySelectorAll('.symbol').forEach(symbol => {
+                symbol.classList.remove('highlighted');
+                // 移除旧边框
+                const oldBorders = symbol.querySelectorAll('.win-symbol-border');
+                oldBorders.forEach(border => border.remove());
+            });
+            
+            try {
+                // 检查是否有特殊的百搭奖励
+                const wildSymbols = countWildSymbols(spinResult.result);
+                let wildBonusWin = 0;
+                let wildBonusMessage = '';
+                
+                if (wildSymbols >= 3) {
+                    // 计算百搭特殊奖励
+                    const bet = slotMachine.getGameState().betPerLine;
+                    let multiplier = 0;
+                    
+                    if (wildSymbols === 3) multiplier = 15;
+                    else if (wildSymbols === 4) multiplier = 50;
+                    else if (wildSymbols === 5) multiplier = 100;
+                    else if (wildSymbols === 6) multiplier = 350;
+                    else if (wildSymbols === 7) multiplier = 1000;
+                    else if (wildSymbols === 8) multiplier = 2500;
+                    else if (wildSymbols >= 9) multiplier = 5000;
+                    
+                    wildBonusWin = bet * multiplier;
+                    
+                    // 高亮所有百搭符号
+                    for (let row = 0; row < 3; row++) {
+                        for (let col = 0; col < 5; col++) {
+                            if (spinResult.result[row][col].id === 'WILD') {
+                                const reelElement = reels[col];
+                                const symbolElement = reelElement.children[row];
+                                
+                                // 添加高亮效果
+                                symbolElement.classList.add('highlighted');
+                                
+                                // 添加金色边框
+                                const border = document.createElement('div');
+                                border.className = 'win-symbol-border';
+                                border.style.borderColor = 'gold';
+                                symbolElement.appendChild(border);
+                            }
+                        }
+                    }
+                    
+                    // 百搭奖励信息
+                    wildBonusMessage = `
+                        <div class="win-line-info" style="background-color: rgba(255, 215, 0, 0.3); border: 1px solid gold;">
+                            <div>
+                                <span class="win-line-color-indicator" style="background-color: gold"></span>
+                                百搭奖励: ${wildSymbols} 个百搭符号
+                            </div>
+                            <div style="font-weight: bold;">${formatAmount(wildBonusWin)} 金币 (${multiplier}x)</div>
+                        </div>
+                    `;
+                    
+                    // 如果有百搭奖励，更新统计数据 - 安全地添加奖励
+                    try {
+                        if (wildBonusWin > 0) {
+                            slotMachine.addWinAmount(wildBonusWin);
+                            updateDisplay();
+                        }
+                    } catch (err) {
+                        console.error("百搭奖励计算错误:", err);
+                    }
+                }
+                
+                if (totalWin > 0 || wildBonusWin > 0) {
+                    // 构建获胜信息
+                    const finalWin = totalWin + wildBonusWin;
+                    let winMessage = `<div style="font-size: 1.2em; margin-bottom: 10px;">恭喜！您赢得了 <span style="color: gold; font-weight: bold;">${formatAmount(finalWin)}</span> 金币</div>`;
+                    
+                    // 添加百搭奖励信息（如果有）
+                    if (wildBonusWin > 0) {
+                        winMessage += wildBonusMessage;
+                    }
+                    
+                    // 高亮显示获胜线路和符号
+                    winLines.forEach(line => {
+                        const { paylineIndex, coordinates, count } = line;
+                        
+                        // 获取支付线颜色
+                        const paylineColor = getComputedStyle(document.documentElement)
+                            .getPropertyValue(`--payline-${paylineIndex}-color`) || 
+                            getPaylineColor(paylineIndex);
+                        
+                        // 高亮显示获胜符号并添加彩色边框
+                        for (let i = 0; i < count; i++) {
+                            const [row, col] = coordinates[i];
+                            if (row >= 0 && row < 3 && col >= 0 && col < 5) { // 增加边界检查
+                                const reelElement = reels[col];
+                                const symbolElement = reelElement.children[row];
+                                
+                                // 添加高亮效果（如果不是已经高亮的百搭）
+                                if (!symbolElement.classList.contains('highlighted')) {
+                                    symbolElement.classList.add('highlighted');
+                                    
+                                    // 添加彩色边框，与支付线颜色相同
+                                    const border = document.createElement('div');
+                                    border.className = 'win-symbol-border';
+                                    border.style.borderColor = paylineColor;
+                                    symbolElement.appendChild(border);
+                                }
+                            }
+                        }
+                        
+                        // 显示获胜支付线
+                        try {
+                            drawPayline(paylineIndex, true);
+                        } catch (err) {
+                            console.error("绘制支付线错误:", err);
+                        }
+                        
+                        // 添加获胜线路信息
+                        const symbols = line.symbols[0];
+                        winMessage += `
+                            <div class="win-line-info">
+                                <div>
+                                    <span class="win-line-color-indicator" style="background-color: ${paylineColor}"></span>
+                                    支付线 ${paylineIndex + 1}: ${count} 个 ${symbolNames[symbols.id]} 符号
+                                </div>
+                                <div style="font-weight: bold;">${formatAmount(line.win)} 金币</div>
+                            </div>`;
+                    });
+                    
+                    // 大奖动画
+                    if (finalWin >= slotMachine.getGameState().betPerLine * slotMachine.getGameState().activePaylines * 5) {
+                        winDisplay.innerHTML = `<div class="big-win">大奖！${formatAmount(finalWin)} 金币！</div>`;
+                    } else {
+                        winDisplay.innerHTML = winMessage;
+                    }
+                } else {
+                    winDisplay.innerHTML = '<div>很遗憾，这次没有中奖。再试一次吧！</div>';
+                }
+            } catch (error) {
+                console.error("结算处理错误:", error);
+                winDisplay.innerHTML = '<div>旋转完成</div>';
+            }
+        }
+        
+        // 计算转轴上百搭符号的数量
+        function countWildSymbols(resultMatrix) {
+            let count = 0;
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 5; col++) {
+                    if (resultMatrix[row][col].id === 'WILD') {
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+        
+        // 更新显示
+        function updateDisplay() {
+            const state = slotMachine.getGameState();
+            
+            betDisplay.textContent = formatAmount(state.betPerLine);
+            creditsDisplay.textContent = formatAmount(state.credits);
+            totalBetStatsDisplay.textContent = formatAmount(state.totalSpent);
+            totalBetDisplay.textContent = formatAmount(state.totalBet);
+            totalWonDisplay.textContent = formatAmount(state.totalWon);
+            spinsCountDisplay.textContent = state.spinsCount;
+            paylinesDisplay.textContent = state.activePaylines;
+            
+            // 计算回报率（如果有足够的旋转）
+            if (state.totalSpent > 0) {
+                const returnRate = (state.totalWon / state.totalSpent * 100).toFixed(2);
+                returnRateDisplay.textContent = returnRate + '%';
+            } else {
+                returnRateDisplay.textContent = '0.00%';
+            }
+            
+            // 更新旋转按钮状态
+            if (state.credits < state.totalBet) {
+                spinButton.disabled = true;
+                spinButton.style.opacity = "0.5";
+            } else {
+                spinButton.disabled = false;
+                spinButton.style.opacity = "1";
+            }
+        }
+        
+        // 自动旋转功能
+        function updateAutoSpinDisplay() {
+            if (autoSpinInProgress) {
+                if (autoSpinInfinite) {
+                    // 无限旋转模式
+                    autoSpinButton.innerHTML = `暂停 <span class="infinity-icon">∞</span>`;
+                    autoSpinButton.classList.add('active');
+                    autoSpinButton.classList.add('infinite');
+                } else {
+                    // 普通旋转模式，显示剩余次数
+                    autoSpinButton.innerHTML = `暂停 <span class="spins-remaining">${autoSpinRemaining}</span>`;
+                    autoSpinButton.classList.add('active');
+                    autoSpinButton.classList.remove('infinite');
+                }
+            } else {
+                // 恢复普通显示
+                autoSpinButton.textContent = '自动旋转';
+                autoSpinButton.classList.remove('active');
+                autoSpinButton.classList.remove('infinite');
+            }
+            
+            // 更新模态窗口中的计数显示
+            autoSpinValue.textContent = autoSpinCount;
+            
+            // 更新无限旋转复选框
+            infiniteSpinCheckbox.checked = autoSpinInfinite;
+            
+            // 禁用或启用次数选择
+            if (infiniteSpinCheckbox.checked) {
+                autoSpinMinus.disabled = true;
+                autoSpinPlus.disabled = true;
+                autoSpinValue.style.opacity = "0.5";
+            } else {
+                autoSpinMinus.disabled = false;
+                autoSpinPlus.disabled = false;
+                autoSpinValue.style.opacity = "1";
+            }
+        }
+        
+        // 打开自动旋转模态窗口
+        autoSpinButton.addEventListener('click', () => {
+            if (!autoSpinInProgress) {
+                // 显示模态窗口
+                autoSpinModal.style.display = 'block';
+            } else {
+                // 暂停自动旋转
+                stopAutoSpin();
+            }
+        });
+        
+        // 增加自动旋转次数
+        autoSpinPlus.addEventListener('click', () => {
+            if (autoSpinCount < 100) {
+                autoSpinCount += 10;
+            } else if (autoSpinCount === 100) {
+                autoSpinCount = 500;
+            } else if (autoSpinCount === 500) {
+                autoSpinCount = 1000;
+            }
+            autoSpinValue.textContent = autoSpinCount;
+        });
+        
+        // 减少自动旋转次数
+        autoSpinMinus.addEventListener('click', () => {
+            if (autoSpinCount === 1000) {
+                autoSpinCount = 500;
+            } else if (autoSpinCount === 500) {
+                autoSpinCount = 100;
+            } else if (autoSpinCount > 10) {
+                autoSpinCount -= 10;
+            }
+            autoSpinValue.textContent = autoSpinCount;
+        });
+        
+        // 取消自动旋转设置
+        autoSpinCancel.addEventListener('click', () => {
+            autoSpinModal.style.display = 'none';
+        });
+        
+        // 开始自动旋转
+        autoSpinStart.addEventListener('click', () => {
+            try {
+                // 隐藏模态窗口
+                autoSpinModal.style.display = 'none';
+                
+                // 设置自动旋转状态
+                autoSpinInProgress = true;
+                autoSpinInfinite = infiniteSpinCheckbox.checked;
+                
+                if (!autoSpinInfinite) {
+                    autoSpinRemaining = autoSpinCount;
+                }
+                
+                updateAutoSpinDisplay();
+                
+                // 开始第一次旋转
+                if (!spinButton.disabled) {
+                    spinReels(true);
+                }
+            } catch (error) {
+                console.error("自动旋转启动错误:", error);
+                // 重置自动旋转状态
+                autoSpinInProgress = false;
+                updateAutoSpinDisplay();
+            }
+        });
+        
+        // 停止自动旋转
+        function stopAutoSpin() {
+            // 清除自动旋转状态
+            autoSpinInProgress = false;
+            autoSpinRemaining = 0;
+            autoSpinInfinite = false;
+            
+            // 清除定时器
+            if (autoSpinTimer) {
+                clearTimeout(autoSpinTimer);
+                autoSpinTimer = null;
+            }
+            
+            updateAutoSpinDisplay();
+        }
+        
+        // 点击模态窗口外部关闭
+        window.addEventListener('click', (event) => {
+            if (event.target === autoSpinModal) {
+                autoSpinModal.style.display = 'none';
+            }
+        });
+        
+        // 事件监听
+        spinButton.addEventListener('click', () => {
+            // 额外确保点击旋转按钮时清除所有旧的效果
+            for (let i = 0; i < slotMachine.PAYLINES.length; i++) {
+                const paylineElement = document.getElementById(`payline-${i}`);
+                if (paylineElement) {
+                    paylineElement.innerHTML = '';
+                }
+            }
+            document.querySelectorAll('.symbol').forEach(symbol => {
+                symbol.classList.remove('highlighted');
+                const oldBorders = symbol.querySelectorAll('.win-symbol-border');
+                oldBorders.forEach(border => border.remove());
+            });
+            
+            // 如果正在自动旋转，停止自动旋转
+            if (autoSpinInProgress) {
+                autoSpinCancel.click();
+            }
+            
+            spinReels(true);
+        });
+        
+        totalBetUpButton.addEventListener('click', () => {
+            const result = slotMachine.increaseTotalBet();
+            betDisplay.textContent = formatAmount(result.betPerLine);
+            totalBetDisplay.textContent = formatAmount(result.totalBet);
+            updateDisplay();
+        });
+        
+        totalBetDownButton.addEventListener('click', () => {
+            const result = slotMachine.decreaseTotalBet();
+            betDisplay.textContent = formatAmount(result.betPerLine);
+            totalBetDisplay.textContent = formatAmount(result.totalBet);
+            updateDisplay();
+        });
+        
+        paylinesUpButton.addEventListener('click', () => {
+            slotMachine.increasePaylines();
+            updateDisplay();
+            drawActivePaylines();
+        });
+        
+        paylinesDownButton.addEventListener('click', () => {
+            slotMachine.decreasePaylines();
+            updateDisplay();
+            drawActivePaylines();
+        });
+        
+        addCreditsButton.addEventListener('click', () => {
+            const amount = parseFloat(prompt('请输入充值金额:', '100.00'));
+            if (!isNaN(amount) && amount > 0) {
+                slotMachine.addCredits(amount);
+                updateDisplay();
+                winDisplay.innerHTML = `<div>充值成功！您的余额已增加 ${formatAmount(amount)} 金币。</div>`;
+            }
+        });
+        
+        // 在界面底部添加支付线信息和说明
+        function addPaylineInfo() {
+            const infoPanelElement = document.querySelector('.info-panel');
+            
+            const paylineInfoDiv = document.createElement('div');
+            paylineInfoDiv.className = 'payline-info';
+            paylineInfoDiv.innerHTML = `
+                <h2>支付线示例</h2>
+                <p>本机共有20条支付线。下方显示部分支付线示例：</p>
+                <div class="payline-examples" id="payline-examples">
+                    <!-- 将通过JavaScript填充 -->
+                </div>
+                <div class="payline-toggle">
+                    <button id="show-paylines">显示所有支付线</button>
+                </div>
+            `;
+            
+            infoPanelElement.appendChild(paylineInfoDiv);
+            
+            // 添加支付线示例
+            const examplesDiv = paylineInfoDiv.querySelector('#payline-examples');
+            const exampleLines = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]; // 显示前10条线作为示例
+            
+            exampleLines.forEach(lineIndex => {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'payline-example';
+                
+                const gridDiv = document.createElement('div');
+                gridDiv.className = 'payline-grid';
+                
+                // 创建3x5的网格
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 5; col++) {
+                        const gridItem = document.createElement('div');
+                        gridItem.className = 'payline-grid-item';
+                        
+                        // 检查该位置是否在支付线上
+                        const isOnPayline = slotMachine.PAYLINES[lineIndex].some(coord => 
+                            coord[0] === row && coord[1] === col);
+                        
+                        if (isOnPayline) {
+                            const dot = document.createElement('div');
+                            dot.className = 'payline-grid-dot';
+                            dot.style.backgroundColor = getPaylineColor(lineIndex);
+                            dot.style.top = '6px';
+                            dot.style.left = '6px';
+                            gridItem.appendChild(dot);
+                        }
+                        
+                        gridDiv.appendChild(gridItem);
+                    }
+                }
+                
+                lineDiv.appendChild(gridDiv);
+                lineDiv.innerHTML += `<p>支付线 ${lineIndex + 1}</p>`;
+                examplesDiv.appendChild(lineDiv);
+            });
+            
+            // 添加显示所有支付线按钮的功能
+            const showPaylinesButton = document.getElementById('show-paylines');
+            showPaylinesButton.addEventListener('click', () => {
+                // 显示或隐藏所有支付线
+                const paylinesVisible = showPaylinesButton.dataset.visible === 'true';
+                
+                if (paylinesVisible) {
+                    // 隐藏所有支付线
+                    for (let i = 0; i < slotMachine.PAYLINES.length; i++) {
+                        const paylineElement = document.getElementById(`payline-${i}`);
+                        if (paylineElement) {
+                            paylineElement.innerHTML = '';
+                        }
+                    }
+                    showPaylinesButton.textContent = '显示所有支付线';
+                    showPaylinesButton.dataset.visible = 'false';
+                } else {
+                    // 分组显示支付线，每组5条
+                    const totalLines = slotMachine.PAYLINES.length;
+                    const displayGroups = Math.ceil(totalLines / 5);
+                    
+                    const displayGroup = (groupIndex) => {
+                        // 先清除所有线
+                        for (let i = 0; i < totalLines; i++) {
+                            const paylineElement = document.getElementById(`payline-${i}`);
+                            if (paylineElement) {
+                                paylineElement.innerHTML = '';
+                            }
+                        }
+                        
+                        // 显示当前组的线
+                        const startIdx = groupIndex * 5;
+                        const endIdx = Math.min(startIdx + 5, totalLines);
+                        
+                        for (let i = startIdx; i < endIdx; i++) {
+                            drawPayline(i, true);
+                        }
+                        
+                        // 如果还有更多组，设置定时器显示下一组
+                        if (groupIndex + 1 < displayGroups && showPaylinesButton.dataset.visible === 'true') {
+                            setTimeout(() => displayGroup(groupIndex + 1), 3000);
+                        } else if (showPaylinesButton.dataset.visible === 'true') {
+                            // 循环回第一组
+                            setTimeout(() => displayGroup(0), 3000);
+                        }
+                    };
+                    
+                    // 开始显示第一组
+                    displayGroup(0);
+                    showPaylinesButton.textContent = '隐藏所有支付线';
+                    showPaylinesButton.dataset.visible = 'true';
+                }
+            });
+            showPaylinesButton.dataset.visible = 'false';
+        }
+        
+        // 初始化显示
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDisplay();
+            addPaylineInfo();
+            
+            // 窗口大小改变时重新绘制支付线
+            window.addEventListener('resize', () => {
+                if (document.getElementById('show-paylines')?.dataset.visible === 'true') {
+                    // 重新计算并显示支付线
+                    const visiblePaylines = document.querySelectorAll('.payline-segment.active')
+                        .length > 0;
+                    if (visiblePaylines) {
+                        const paylineElements = document.querySelectorAll('.payline');
+                        for (let i = 0; i < paylineElements.length; i++) {
+                            if (paylineElements[i].innerHTML !== '') {
+                                const paylineIndex = parseInt(paylineElements[i].id.split('-')[1]);
+                                drawPayline(paylineIndex, true);
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 初始化背景音乐
+            initBackgroundMusic();
+            
+            // Turbo模式切换
+            turboButton.addEventListener('click', () => {
+                turboMode = !turboMode;
+                if (turboMode) {
+                    turboButton.classList.add('active');
+                    turboButton.innerHTML = '<img src="Lightning-Emoji-PNG_001.png" class="turbo-icon" alt="⚡"> 极速开启';
+                } else {
+                    turboButton.classList.remove('active');
+                    turboButton.innerHTML = '<img src="Lightning-Emoji-PNG_001.png" class="turbo-icon" alt="⚡"> 极速模式';
+                }
+            });
+        });
+        
+        // 初始化背景音乐功能
+        function initBackgroundMusic() {
+            const bgm = document.getElementById('background-music');
+            const musicControl = document.getElementById('music-control');
+            const volumeControl = document.getElementById('volume-control');
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeIcon = document.querySelector('.volume-icon');
+            let hasInteracted = false;
+            
+            // 音量控制
+            bgm.volume = 0.5;
+            
+            // 创建音乐提示
+            const playPrompt = document.createElement('div');
+            playPrompt.className = 'play-prompt';
+            playPrompt.textContent = '点击任意位置播放音乐';
+            document.body.appendChild(playPrompt);
+            
+            // 尝试多种方法启动音频
+            function attemptAutoplay() {
+                bgm.play().then(() => {
+                    musicControl.querySelector('.music-icon').textContent = '🔊';
+                    musicControl.classList.remove('muted');
+                    if (playPrompt.parentNode) {
+                        playPrompt.parentNode.removeChild(playPrompt);
+                    }
+                    hasInteracted = true;
+                }).catch(error => {
+                    console.log('自动播放失败:', error);
+                    // 保留提示，等待用户交互
+                });
+            }
+            
+            // 尝试自动播放
+            attemptAutoplay();
+            
+            // 用户首次点击时播放
+            document.addEventListener('click', function() {
+                if (!hasInteracted) {
+                    attemptAutoplay();
+                }
+            }, { once: false });
+            
+            // 音乐控制按钮点击事件
+            musicControl.addEventListener('click', () => {
+                if (bgm.paused) {
+                    bgm.play();
+                    musicControl.querySelector('.music-icon').textContent = '🔊';
+                    musicControl.classList.remove('muted');
+                } else {
+                    bgm.pause();
+                    musicControl.querySelector('.music-icon').textContent = '🔇';
+                    musicControl.classList.add('muted');
+                }
+            });
+            
+            // 音乐控制按钮鼠标悬停事件
+            musicControl.addEventListener('mouseenter', () => {
+                volumeControl.classList.add('active');
+            });
+            
+            // 整个音频控制区域的鼠标离开事件
+            document.addEventListener('mousemove', (e) => {
+                const musicRect = musicControl.getBoundingClientRect();
+                const volumeRect = volumeControl.getBoundingClientRect();
+                
+                // 检查鼠标是否在音乐控制按钮或音量控制区域内
+                const inMusicControl = e.clientX >= musicRect.left && e.clientX <= musicRect.right &&
+                                      e.clientY >= musicRect.top && e.clientY <= musicRect.bottom;
+                const inVolumeControl = e.clientX >= volumeRect.left && e.clientX <= volumeRect.right &&
+                                       e.clientY >= volumeRect.top && e.clientY <= volumeRect.bottom;
+                
+                // 如果鼠标不在两个区域内，隐藏音量控制
+                if (!inMusicControl && !inVolumeControl && volumeControl.classList.contains('active')) {
+                    // 使用延迟以防止快速移动鼠标时立即隐藏
+                    setTimeout(() => {
+                        const newMusicRect = musicControl.getBoundingClientRect();
+                        const newVolumeRect = volumeControl.getBoundingClientRect();
+                        
+                        const stillInMusic = e.clientX >= newMusicRect.left && e.clientX <= newMusicRect.right &&
+                                            e.clientY >= newMusicRect.top && e.clientY <= newMusicRect.bottom;
+                        const stillInVolume = e.clientX >= newVolumeRect.left && e.clientX <= newVolumeRect.right &&
+                                             e.clientY >= newVolumeRect.top && e.clientY <= newVolumeRect.bottom;
+                        
+                        if (!stillInMusic && !stillInVolume) {
+                            volumeControl.classList.remove('active');
+                        }
+                    }, 800);
+                }
+            });
+            
+            // 音量滑块事件
+            volumeSlider.addEventListener('input', () => {
+                const volume = volumeSlider.value / 100;
+                bgm.volume = volume;
+                
+                // 更新音量图标
+                if (volume === 0) {
+                    volumeIcon.textContent = '🔈';
+                } else if (volume < 0.5) {
+                    volumeIcon.textContent = '🔉';
+                } else {
+                    volumeIcon.textContent = '🔊';
+                }
+                
+                // 保存用户音量偏好
+                localStorage.setItem('bgmVolume', volume);
+            });
+            
+            // 加载用户音量偏好
+            const savedVolume = localStorage.getItem('bgmVolume');
+            if (savedVolume !== null) {
+                const volume = parseFloat(savedVolume);
+                bgm.volume = volume;
+                volumeSlider.value = volume * 100;
+                
+                // 设置初始音量图标
+                if (volume === 0) {
+                    volumeIcon.textContent = '🔈';
+                } else if (volume < 0.5) {
+                    volumeIcon.textContent = '🔉';
+                } else {
+                    volumeIcon.textContent = '🔊';
+                }
+            }
+            
+            // 在用户与页面交互时再次尝试播放
+            const userInteractions = ['keydown', 'mousedown', 'touchstart'];
+            userInteractions.forEach(event => {
+                document.addEventListener(event, function() {
+                    if (!hasInteracted) {
+                        attemptAutoplay();
+                    }
+                }, { once: true });
+            });
+            
+            // 在窗口获得焦点时尝试播放
+            window.addEventListener('focus', function() {
+                if (!bgm.paused) {
+                    attemptAutoplay();
+                }
+            });
+        }
+        
+        // 无限旋转选项点击事件
+        infiniteSpinCheckbox.addEventListener('change', () => {
+            autoSpinInfinite = infiniteSpinCheckbox.checked;
+            updateAutoSpinDisplay();
+        });
+    </script>
+</body>
+</html> 

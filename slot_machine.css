@@ -1,0 +1,81 @@
+/* 支付线颜色 */
+:root {
+    --payline-0-color: #FF0000;    /* 红色 */
+    --payline-1-color: #FF9900;    /* 橙色 */  
+    --payline-2-color: #FFFF00;    /* 黄色 */
+    --payline-3-color: #33CC33;    /* 绿色 */
+    --payline-4-color: #3399FF;    /* 蓝色 */
+    --payline-5-color: #9900CC;    /* 紫色 */
+    --payline-6-color: #FF66CC;    /* 粉色 */
+    --payline-7-color: #00FFCC;    /* 青色 */
+    --payline-8-color: #FF3366;    /* 玫红 */
+    --payline-9-color: #66FF33;    /* 浅绿 */
+    --payline-10-color: #FF99CC;   /* 浅粉 */
+    --payline-11-color: #CCFF00;   /* 黄绿 */
+    --payline-12-color: #00CCFF;   /* 天蓝 */
+    --payline-13-color: #CC99FF;   /* 淡紫 */
+    --payline-14-color: #FFCC00;   /* 金黄 */
+    --payline-15-color: #FF6600;   /* 暗橙 */
+    --payline-16-color: #FF33FF;   /* 亮紫 */
+    --payline-17-color: #33FFCC;   /* 蓝绿 */
+    --payline-18-color: #66CCFF;   /* 浅蓝 */
+    --payline-19-color: #FFFF99;   /* 浅黄 */
+}
+
+/* 支付线按钮样式 */
+#show-paylines {
+    display: block;
+    margin: 10px auto;
+    padding: 8px 15px;
+    background-color: #2c3e50;
+    color: white;
+    border: 1px solid #34495e;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+#show-paylines:hover {
+    background-color: #34495e;
+}
+
+/* 支付线数字标记 */
+.payline-number {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 7;
+}
+
+/* 支付线说明区域 */
+.payline-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 15px;
+    gap: 10px;
+}
+
+.payline-legend {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: white;
+    margin: 5px;
+}
+
+.payline-color-sample {
+    width: 15px;
+    height: 4px;
+    border-radius: 2px;
+    margin-right: 5px;
+    box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.8);
+} 
