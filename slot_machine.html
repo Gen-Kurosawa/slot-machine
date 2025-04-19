@@ -3088,52 +3088,126 @@
             let loadedResources = 0;
             const totalResources = imagesToLoad.length + audioToLoad.length;
             
+            // 设置加载超时
+            const loadTimeout = setTimeout(function() {
+                console.log("资源加载超时，强制显示开始按钮");
+                document.querySelector('.loading-text').textContent = '加载已完成，请点击开始游戏';
+                startGameBtn.style.display = 'block';
+                progressBar.style.width = '100%';
+            }, 15000); // 15秒超时
+            
             // 更新加载进度
             function updateProgress() {
                 loadedResources++;
                 const progress = Math.min((loadedResources / totalResources) * 100, 100);
                 progressBar.style.width = progress + '%';
                 
-                // 所有资源加载完成
-                if (loadedResources >= totalResources) {
-                    setTimeout(() => {
-                        document.querySelector('.loading-text').textContent = '加载完成！点击按钮开始游戏';
-                        startGameBtn.style.display = 'block';
-                    }, 500);
+                // 当所有资源加载完成或加载了50%以上资源时
+                if (loadedResources >= totalResources || progress >= 50) {
+                    clearTimeout(loadTimeout); // 清除超时定时器
+                    document.querySelector('.loading-text').textContent = '加载完成！点击按钮开始游戏';
+                    startGameBtn.style.display = 'block';
                 }
             }
             
-            // 预加载图片
+            // 预加载图片 - 使用更可靠的方法
             function preloadImages() {
+                // 如果没有图片需要加载，直接更新进度
                 if (imagesToLoad.length === 0) {
+                    for (let i = 0; i < imagesToLoad.length; i++) {
+                        updateProgress();
+                    }
                     return;
                 }
                 
-                imagesToLoad.forEach(src => {
+                // 为每个图片设置加载超时
+                imagesToLoad.forEach((src, index) => {
                     const img = new Image();
-                    img.onload = updateProgress;
-                    img.onerror = () => {
-                        console.error('无法加载图片:', src);
-                        updateProgress();
+                    let imageLoaded = false;
+                    
+                    // 设置单个图片的加载超时
+                    const imgTimeout = setTimeout(() => {
+                        if (!imageLoaded) {
+                            console.warn('图片加载超时:', src);
+                            imageLoaded = true;
+                            updateProgress();
+                        }
+                    }, 5000); // 5秒超时
+                    
+                    img.onload = function() {
+                        if (!imageLoaded) {
+                            clearTimeout(imgTimeout);
+                            imageLoaded = true;
+                            updateProgress();
+                        }
                     };
-                    img.src = src;
+                    
+                    img.onerror = function() {
+                        if (!imageLoaded) {
+                            clearTimeout(imgTimeout);
+                            console.error('无法加载图片:', src);
+                            imageLoaded = true;
+                            updateProgress();
+                        }
+                    };
+                    
+                    // 移动设备优化：使用小尺寸缓存版本或设置较低质量
+                    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                        // 尝试添加时间戳避免缓存问题
+                        img.src = src + '?t=' + new Date().getTime();
+                    } else {
+                        img.src = src;
+                    }
                 });
             }
             
-            // 预加载音频
+            // 预加载音频 - 移动设备上简化处理
             function preloadAudio() {
+                // 移动设备上直接完成音频加载，不等待
+                if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    for (let i = 0; i < audioToLoad.length; i++) {
+                        updateProgress();
+                    }
+                    return;
+                }
+                
                 if (audioToLoad.length === 0) {
                     return;
                 }
                 
                 audioToLoad.forEach(src => {
                     const audio = new Audio();
-                    audio.oncanplaythrough = updateProgress;
-                    audio.onerror = () => {
-                        console.error('无法加载音频:', src);
-                        updateProgress();
+                    let audioLoaded = false;
+                    
+                    // 音频加载超时
+                    const audioTimeout = setTimeout(() => {
+                        if (!audioLoaded) {
+                            console.warn('音频加载超时:', src);
+                            audioLoaded = true;
+                            updateProgress();
+                        }
+                    }, 5000); // 5秒超时
+                    
+                    audio.oncanplaythrough = function() {
+                        if (!audioLoaded) {
+                            clearTimeout(audioTimeout);
+                            audioLoaded = true;
+                            updateProgress();
+                        }
                     };
+                    
+                    audio.onerror = function() {
+                        if (!audioLoaded) {
+                            clearTimeout(audioTimeout);
+                            console.error('无法加载音频:', src);
+                            audioLoaded = true;
+                            updateProgress();
+                        }
+                    };
+                    
                     audio.src = src;
+                    // 预加载但不播放
+                    audio.load();
                 });
             }
             
@@ -3152,6 +3226,14 @@
                     loadingOverlay.style.display = 'none';
                 }, 500);
             });
+            
+            // 确保在移动设备上添加触摸启动音频的能力
+            document.addEventListener('touchstart', function() {
+                // 尝试加载音频（iOS需要用户交互才能加载音频）
+                if (bgMusic) {
+                    bgMusic.load();
+                }
+            }, {once: true});
             
             // 开始加载资源
             preloadImages();
